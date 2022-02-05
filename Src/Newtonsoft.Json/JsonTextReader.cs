@@ -47,6 +47,9 @@ namespace Newtonsoft.Json
 #if HAVE_DATE_TIME_OFFSET
         ReadAsDateTimeOffset,
 #endif
+#if HAVE_DATE_ONLY
+        ReadAsDateOnly,
+#endif
         ReadAsDouble,
         ReadAsBoolean
     }
@@ -753,6 +756,15 @@ namespace Newtonsoft.Json
 
                     return ReadDateTimeOffsetString((string?)Value);
 #endif
+#if HAVE_DATE_ONLY
+                case ReadType.ReadAsDateOnly:
+                    if (Value is DateOnly dateOnly)
+                    {
+                        return dateOnly;
+                    }
+
+                    return ReadDateOnlyString((string?)Value);
+#endif
                 default:
                     throw new ArgumentOutOfRangeException(nameof(readType));
             }
@@ -1039,6 +1051,17 @@ namespace Newtonsoft.Json
         public override DateTimeOffset? ReadAsDateTimeOffset()
         {
             return (DateTimeOffset?)ReadStringValue(ReadType.ReadAsDateTimeOffset);
+        }
+#endif
+
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="DateOnly"/>.
+        /// </summary>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="DateOnly"/>. This method will return <c>null</c> at the end of an array.</returns>
+        public override DateOnly? ReadAsDateOnly()
+        {
+            return (DateOnly?)ReadStringValue(ReadType.ReadAsDateOnly);
         }
 #endif
 

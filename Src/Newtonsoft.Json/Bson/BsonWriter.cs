@@ -451,6 +451,18 @@ namespace Newtonsoft.Json.Bson
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Writes a <see cref="DateOnly"/> value.
+        /// </summary>
+        /// <param name="value">The <see cref="DateOnly"/> value to write.</param>
+        public override void WriteValue(DateOnly value)
+        {
+            base.WriteValue(value);
+            AddValue(value, BsonType.Date);
+        }
+#endif
+
         /// <summary>
         /// Writes a <see cref="Byte"/>[] value.
         /// </summary>

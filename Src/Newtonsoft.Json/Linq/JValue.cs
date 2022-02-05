@@ -142,6 +142,17 @@ namespace Newtonsoft.Json.Linq
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JValue"/> class with the given value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public JValue(DateOnly value)
+            : this(value, JTokenType.Date)
+        {
+        }
+#endif
+
         /// <summary>
         /// Initializes a new instance of the <see cref="JValue"/> class with the given value.
         /// </summary>
@@ -317,7 +328,7 @@ namespace Newtonsoft.Json.Linq
 
                     return b1.CompareTo(b2);
                 case JTokenType.Date:
-#if HAVE_DATE_TIME_OFFSET
+#if HAVE_DATE_TIME_OFFSET || HAVE_DATE_ONLY
                     if (objA is DateTime dateA)
                     {
 #else
@@ -332,6 +343,13 @@ namespace Newtonsoft.Json.Linq
                         }
                         else
 #endif
+#if HAVE_DATE_ONLY
+                        if (objB is DateOnly dateOnlyB)
+                        {
+                            dateB = dateOnlyB.ToDateTime(TimeOnly.MinValue);
+                        }
+                        else
+#endif
                         {
                             dateB = Convert.ToDateTime(objB, CultureInfo.InvariantCulture);
                         }
@@ -339,16 +357,29 @@ namespace Newtonsoft.Json.Linq
                         return dateA.CompareTo(dateB);
 #if HAVE_DATE_TIME_OFFSET
                     }
-                    else
+                    else if(objA is DateTimeOffset offsetA)
                     {
-                        DateTimeOffset offsetA = (DateTimeOffset)objA;
                         if (!(objB is DateTimeOffset offsetB))
                         {
                             offsetB = new DateTimeOffset(Convert.ToDateTime(objB, CultureInfo.InvariantCulture));
                         }
 
                         return offsetA.CompareTo(offsetB);
+#endif
+#if HAVE_DATE_ONLY
                     }
+                    else if(objA is DateOnly dateOnlyA)
+                    {
+                        if (objB is not DateOnly dateOnlyB)
+                        {
+                            dateOnlyB = DateOnly.FromDateTime(Convert.ToDateTime(objB, CultureInfo.InvariantCulture));
+                        }
+
+                        return dateOnlyA.CompareTo(dateOnlyB);
+#endif
+#if HAVE_DATE_TIME_OFFSET || HAVE_DATE_ONLY
+                    }
+                    throw new InvalidOperationException("Object must be DateTime, DateTimeOffset or DateOnly.");
 #endif
                 case JTokenType.Bytes:
                     if (!(objB is byte[] bytesB))
@@ -645,6 +676,12 @@ namespace Newtonsoft.Json.Linq
                 return JTokenType.Date;
             }
 #endif
+#if HAVE_DATE_ONLY
+            else if (value is DateOnly)
+            {
+                return JTokenType.Date;
+            }
+#endif
             else if (value is byte[])
             {
                 return JTokenType.Bytes;
@@ -798,6 +835,13 @@ namespace Newtonsoft.Json.Linq
                     if (_value is DateTimeOffset offset)
                     {
                         writer.WriteValue(offset);
+                    }
+                    else
+#endif
+#if HAVE_DATE_ONLY
+                    if (_value is DateOnly dateOnly)
+                    {
+                        writer.WriteValue(dateOnly);
                     }
                     else
 #endif

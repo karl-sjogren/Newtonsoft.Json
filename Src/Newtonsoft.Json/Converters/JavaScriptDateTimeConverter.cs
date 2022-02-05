@@ -56,6 +56,13 @@ namespace Newtonsoft.Json.Converters
                 ticks = DateTimeUtils.ConvertDateTimeToJavaScriptTicks(utcDateTimeOffset.UtcDateTime);
             }
 #endif
+#if HAVE_DATE_ONLY
+            else if (value is DateOnly dateOnly)
+            {
+                DateTime utcDateTime = dateOnly.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+                ticks = DateTimeUtils.ConvertDateTimeToJavaScriptTicks(utcDateTime);
+            }
+#endif
             else
             {
                 throw new JsonSerializationException("Expected date object value.");
@@ -96,13 +103,23 @@ namespace Newtonsoft.Json.Converters
                 throw JsonSerializationException.Create(reader, errorMessage);
             }
 
-#if HAVE_DATE_TIME_OFFSET
+#if HAVE_DATE_TIME_OFFSET || HAVE_DATE_ONLY
             Type t = (ReflectionUtils.IsNullableType(objectType))
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
+#endif
+
+#if HAVE_DATE_TIME_OFFSET
             if (t == typeof(DateTimeOffset))
             {
                 return new DateTimeOffset(d);
+            }
+#endif
+
+#if HAVE_DATE_ONLY
+            if (t == typeof(DateOnly))
+            {
+                return DateOnly.FromDateTime(d);
             }
 #endif
             return d;

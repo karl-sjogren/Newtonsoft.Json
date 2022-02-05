@@ -488,6 +488,87 @@ namespace Newtonsoft.Json.Utilities
             return false;
         }
 #endif
+#if HAVE_DATE_ONLY
+        internal static bool TryParseDateOnly(StringReference s, string? dateFormatString, CultureInfo culture, out DateOnly dateOnly)
+        {
+            if (s.Length > 0)
+            {
+                int i = s.StartIndex;
+                if (s[i] == '/')
+                {
+                    if (s.Length >= 9 && s.StartsWith("/Date(") && s.EndsWith(")/"))
+                    {
+                        if (TryParseDateTimeOffsetMicrosoft(s, out var dt))
+                        {
+                            dateOnly = DateOnly.FromDateTime(dt.Date);
+                            return true;
+                        }
+                    }
+                }
+                else if (s.Length >= 19 && s.Length <= 40 && char.IsDigit(s[i]) && s[i + 10] == 'T')
+                {
+                    if (TryParseDateTimeOffsetIso(s, out var dt))
+                    {
+                        dateOnly = DateOnly.FromDateTime(dt.Date);
+                        return true;
+                    }
+                }
+
+                if (!StringUtils.IsNullOrEmpty(dateFormatString))
+                {
+                    if (TryParseDateTimeOffsetExact(s.ToString(), dateFormatString, culture, out var dt))
+                    {
+                        dateOnly = DateOnly.FromDateTime(dt.Date);
+                        return true;
+                    }
+                }
+            }
+
+            dateOnly = default;
+            return false;
+        }
+
+        internal static bool TryParseDateOnly(string s, string? dateFormatString, CultureInfo culture, out DateOnly dateOnly)
+        {
+            if (s.Length > 0)
+            {
+                if (s[0] == '/')
+                {
+                    if (s.Length >= 9 && s.StartsWith("/Date(", StringComparison.Ordinal) && s.EndsWith(")/", StringComparison.Ordinal))
+                    {
+                        if (TryParseDateTimeOffsetMicrosoft(new StringReference(s.ToCharArray(), 0, s.Length), out var dt))
+                        {
+                            dateOnly = DateOnly.FromDateTime(dt.Date);
+                            return true;
+                        }
+                    }
+                }
+                else if (s.Length >= 19 && s.Length <= 40 && char.IsDigit(s[0]) && s[10] == 'T')
+                {
+                    if (DateTimeOffset.TryParseExact(s, IsoDateFormat, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _))
+                    {
+                        if (TryParseDateTimeOffsetIso(new StringReference(s.ToCharArray(), 0, s.Length), out var dt))
+                        {
+                            dateOnly = DateOnly.FromDateTime(dt.Date);
+                            return true;
+                        }
+                    }
+                }
+
+                if (!StringUtils.IsNullOrEmpty(dateFormatString))
+                {
+                    if (TryParseDateTimeOffsetExact(s, dateFormatString, culture, out var dt))
+                    {
+                        dateOnly = DateOnly.FromDateTime(dt.Date);
+                        return true;
+                    }
+                }
+            }
+
+            dateOnly = default;
+            return false;
+        }
+#endif
 
         private static bool TryParseMicrosoftDate(StringReference text, out long ticks, out TimeSpan offset, out DateTimeKind kind)
         {
@@ -764,6 +845,13 @@ namespace Newtonsoft.Json.Utilities
             {
                 writer.Write(value.ToString(formatString, culture));
             }
+        }
+#endif
+
+#if HAVE_DATE_ONLY
+        internal static void WriteDateOnlyString(TextWriter writer, DateOnly value, string? formatString, CultureInfo culture)
+        {
+            writer.Write(value.ToString(formatString, culture));
         }
 #endif
         #endregion

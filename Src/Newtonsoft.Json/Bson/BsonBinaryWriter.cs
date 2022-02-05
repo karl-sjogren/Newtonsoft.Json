@@ -151,10 +151,24 @@ namespace Newtonsoft.Json.Bson
                         ticks = DateTimeUtils.ConvertDateTimeToJavaScriptTicks(dateTime, false);
                     }
 #if HAVE_DATE_TIME_OFFSET
-                    else
+                    else if (value.Value is DateTimeOffset dateTimeOffset)
                     {
-                        DateTimeOffset dateTimeOffset = (DateTimeOffset)value.Value;
                         ticks = DateTimeUtils.ConvertDateTimeToJavaScriptTicks(dateTimeOffset.UtcDateTime, dateTimeOffset.Offset);
+                    }
+#endif
+#if HAVE_DATE_ONLY
+                    else if (value.Value is DateOnly dateOnly)
+                    {
+                        dateTime = dateOnly.ToDateTime(TimeOnly.MinValue);
+                        if (DateTimeKindHandling == DateTimeKind.Utc)
+                        {
+                            dateTime = dateTime.ToUniversalTime();
+                        }
+                        else if (DateTimeKindHandling == DateTimeKind.Local)
+                        {
+                            dateTime = dateTime.ToLocalTime();
+                        }
+                        ticks = DateTimeUtils.ConvertDateTimeToJavaScriptTicks(dateTime);
                     }
 #endif
 

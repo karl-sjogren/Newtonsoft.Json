@@ -611,6 +611,13 @@ namespace Newtonsoft.Json
                     }
                     else
 #endif
+#if HAVE_DATE_ONLY
+                    if (value is DateOnly dateOnly)
+                    {
+                        WriteValue(dateOnly);
+                    }
+                    else
+#endif
                     {
                         WriteValue(Convert.ToDateTime(value, CultureInfo.InvariantCulture));
                     }
@@ -1084,6 +1091,17 @@ namespace Newtonsoft.Json
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Writes a <see cref="DateOnly"/> value.
+        /// </summary>
+        /// <param name="value">The <see cref="DateOnly"/> value to write.</param>
+        public virtual void WriteValue(DateOnly value)
+        {
+            InternalWriteValue(JsonToken.Date);
+        }
+#endif
+
         /// <summary>
         /// Writes a <see cref="Guid"/> value.
         /// </summary>
@@ -1348,6 +1366,24 @@ namespace Newtonsoft.Json
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="DateOnly"/> value.
+        /// </summary>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="DateOnly"/> value to write.</param>
+        public virtual void WriteValue(DateOnly? value)
+        {
+            if (value == null)
+            {
+                WriteNull();
+            }
+            else
+            {
+                WriteValue(value.GetValueOrDefault());
+            }
+        }
+#endif
+
         /// <summary>
         /// Writes a <see cref="Nullable{T}"/> of <see cref="Guid"/> value.
         /// </summary>
@@ -1592,6 +1628,15 @@ namespace Newtonsoft.Json
 
                     case PrimitiveTypeCode.DateTimeOffsetNullable:
                         writer.WriteValue((value == null) ? (DateTimeOffset?)null : (DateTimeOffset)value);
+                        return;
+#endif
+#if HAVE_DATE_ONLY
+                    case PrimitiveTypeCode.DateOnly:
+                        writer.WriteValue((DateOnly)value);
+                        return;
+
+                    case PrimitiveTypeCode.DateOnlyNullable:
+                        writer.WriteValue((value == null) ? (DateOnly?)null : (DateOnly)value);
                         return;
 #endif
                     case PrimitiveTypeCode.Decimal:

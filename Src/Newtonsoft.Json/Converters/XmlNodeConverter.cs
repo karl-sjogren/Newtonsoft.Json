@@ -1779,6 +1779,13 @@ namespace Newtonsoft.Json.Converters
                     }
 
 #endif
+#if HAVE_DATE_ONLY
+                    if (reader.Value is DateOnly dateOnly)
+                    {
+                        return XmlConvert.ToString(dateOnly.ToDateTime(TimeOnly.MinValue), DateTimeUtils.ToSerializationMode(DateTimeKind.Local));
+                    }
+
+#endif
                     DateTime d = Convert.ToDateTime(reader.Value, CultureInfo.InvariantCulture);
 #if !PORTABLE || NETSTANDARD1_3
                     return XmlConvert.ToString(d, DateTimeUtils.ToSerializationMode(d.Kind));

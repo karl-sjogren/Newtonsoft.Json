@@ -448,6 +448,18 @@ namespace Newtonsoft.Json.Linq
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Writes a <see cref="DateOnly"/> value.
+        /// </summary>
+        /// <param name="value">The <see cref="DateOnly"/> value to write.</param>
+        public override void WriteValue(DateOnly value)
+        {
+            base.WriteValue(value);
+            AddValue(value, JsonToken.Date);
+        }
+#endif
+
         /// <summary>
         /// Writes a <see cref="Byte"/>[] value.
         /// </summary>

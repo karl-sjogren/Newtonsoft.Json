@@ -155,6 +155,24 @@ namespace Newtonsoft.Json
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Converts the <see cref="DateOnly"/> to its JSON string representation.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>A JSON string representation of the <see cref="DateTimeOffset"/>.</returns>
+        public static string ToString(DateOnly value)
+        {
+            using (StringWriter writer = StringUtils.CreateStringWriter(64))
+            {
+                writer.Write('"');
+                DateTimeUtils.WriteDateOnlyString(writer, value, null, CultureInfo.InvariantCulture);
+                writer.Write('"');
+                return writer.ToString();
+            }
+        }
+#endif
+
         /// <summary>
         /// Converts the <see cref="Boolean"/> to its JSON string representation.
         /// </summary>
@@ -502,6 +520,10 @@ namespace Newtonsoft.Json
 #if HAVE_DATE_TIME_OFFSET
                 case PrimitiveTypeCode.DateTimeOffset:
                     return ToString((DateTimeOffset)value);
+#endif
+#if HAVE_DATE_ONLY
+                case PrimitiveTypeCode.DateOnly:
+                    return ToString((DateOnly)value);
 #endif
                 case PrimitiveTypeCode.Guid:
                     return ToString((Guid)value);

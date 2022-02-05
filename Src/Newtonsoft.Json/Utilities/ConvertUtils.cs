@@ -91,7 +91,9 @@ namespace Newtonsoft.Json.Utilities
         Uri = 38,
         String = 39,
         Bytes = 40,
-        DBNull = 41
+        DBNull = 41,
+        DateOnly = 42,
+        DateOnlyNullable = 43
     }
 
     internal class TypeInformation
@@ -163,7 +165,11 @@ namespace Newtonsoft.Json.Utilities
                 { typeof(string), PrimitiveTypeCode.String },
                 { typeof(byte[]), PrimitiveTypeCode.Bytes },
 #if HAVE_ADO_NET
-                { typeof(DBNull), PrimitiveTypeCode.DBNull }
+                { typeof(DBNull), PrimitiveTypeCode.DBNull },
+#endif
+#if HAVE_DATE_ONLY
+                { typeof(DateOnly), PrimitiveTypeCode.DateOnly },
+                { typeof(DateOnly?), PrimitiveTypeCode.DateOnlyNullable }
 #endif
             };
 
@@ -450,6 +456,14 @@ namespace Newtonsoft.Json.Utilities
             if (initialValue is DateTime dt && targetType == typeof(DateTimeOffset))
             {
                 value = new DateTimeOffset(dt);
+                return ConvertResult.Success;
+            }
+#endif
+
+#if HAVE_DATE_ONLY
+            if (initialValue is DateTime dt2 && targetType == typeof(DateOnly))
+            {
+                value = DateOnly.FromDateTime(dt2);
                 return ConvertResult.Success;
             }
 #endif

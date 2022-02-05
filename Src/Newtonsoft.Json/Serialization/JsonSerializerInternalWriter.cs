@@ -1151,6 +1151,16 @@ namespace Newtonsoft.Json.Serialization
                         return sw.ToString();
                     }
 #endif
+#if HAVE_DATE_ONLY
+                    case PrimitiveTypeCode.DateOnly:
+                    case PrimitiveTypeCode.DateOnlyNullable:
+                    {
+                        escape = false;
+                        StringWriter sw = new StringWriter(CultureInfo.InvariantCulture);
+                        DateTimeUtils.WriteDateOnlyString(sw, (DateOnly)name, writer.DateFormatString, writer.Culture);
+                        return sw.ToString();
+                    }
+#endif
                     case PrimitiveTypeCode.Double:
                     case PrimitiveTypeCode.DoubleNullable:
                     {

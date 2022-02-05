@@ -36,6 +36,10 @@ namespace Newtonsoft.Json.Converters
     {
         private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
 
+#if HAVE_DATE_ONLY
+        private const string DefaultDateOnlyFormat = "yyyy'-'MM'-'dd'";
+#endif
+
         private DateTimeStyles _dateTimeStyles = DateTimeStyles.RoundtripKind;
         private string? _dateTimeFormat;
         private CultureInfo? _culture;
@@ -102,6 +106,12 @@ namespace Newtonsoft.Json.Converters
                 text = dateTimeOffset.ToString(_dateTimeFormat ?? DefaultDateTimeFormat, Culture);
             }
 #endif
+#if HAVE_DATE_ONLY
+            else if (value is DateOnly dateOnly)
+            {
+                text = dateOnly.ToString(_dateTimeFormat ?? DefaultDateOnlyFormat, Culture);
+            }
+#endif
             else
             {
                 throw new JsonSerializationException("Unexpected value when converting date. Expected DateTime or DateTimeOffset, got {0}.".FormatWith(CultureInfo.InvariantCulture, ReflectionUtils.GetObjectType(value)!));
@@ -131,7 +141,7 @@ namespace Newtonsoft.Json.Converters
                 return null;
             }
 
-#if HAVE_DATE_TIME_OFFSET
+#if HAVE_DATE_TIME_OFFSET || HAVE_DATE_ONLY
             Type t = (nullable)
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
@@ -149,6 +159,18 @@ namespace Newtonsoft.Json.Converters
                 if (reader.Value is DateTimeOffset offset)
                 {
                     return offset.DateTime;
+                }
+#endif
+#if HAVE_DATE_ONLY
+                if (t == typeof(DateOnly))
+                {
+                    return (reader.Value is DateOnly) ? reader.Value : DateOnly.FromDateTime((DateTime)reader.Value!);
+                }
+
+                // converter is expected to return a DateTime
+                if (reader.Value is DateOnly dateOnly)
+                {
+                    return dateOnly.ToDateTime(TimeOnly.MinValue);
                 }
 #endif
 
@@ -177,6 +199,20 @@ namespace Newtonsoft.Json.Converters
                 else
                 {
                     return DateTimeOffset.Parse(dateText, Culture, _dateTimeStyles);
+                }
+            }
+#endif
+
+#if HAVE_DATE_ONLY
+            if (t == typeof(DateOnly))
+            {
+                if (!StringUtils.IsNullOrEmpty(_dateTimeFormat))
+                {
+                    return DateOnly.ParseExact(dateText, _dateTimeFormat, Culture, _dateTimeStyles);
+                }
+                else
+                {
+                    return DateOnly.Parse(dateText, Culture, _dateTimeStyles);
                 }
             }
 #endif

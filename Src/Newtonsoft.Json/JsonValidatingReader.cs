@@ -475,6 +475,20 @@ namespace Newtonsoft.Json
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="DateOnly"/>.
+        /// </summary>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="DateOnly"/>.</returns>
+        public override DateOnly? ReadAsDateOnly()
+        {
+            DateOnly? dateOnly = _reader.ReadAsDateOnly();
+
+            ValidateCurrentToken();
+            return dateOnly;
+        }
+#endif
+
         /// <summary>
         /// Reads the next JSON token from the underlying <see cref="JsonReader"/>.
         /// </summary>

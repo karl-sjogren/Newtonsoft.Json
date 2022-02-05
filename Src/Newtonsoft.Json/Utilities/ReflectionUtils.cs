@@ -1094,6 +1094,10 @@ namespace Newtonsoft.Json.Utilities
                 case PrimitiveTypeCode.DateTimeOffset:
                     return new DateTimeOffset();
 #endif
+#if HAVE_DATE_ONLY
+                case PrimitiveTypeCode.DateOnly:
+                    return new DateOnly();
+#endif
             }
 
             if (IsNullable(type))

@@ -56,6 +56,12 @@ namespace Newtonsoft.Json.Converters
                 seconds = (long)(dateTimeOffset.ToUniversalTime() - UnixEpoch).TotalSeconds;
             }
 #endif
+#if HAVE_DATE_ONLY
+            else if (value is DateOnly dateOnly)
+            {
+                seconds = (long)(dateOnly.ToDateTime(TimeOnly.MinValue).ToUniversalTime() - UnixEpoch).TotalSeconds;
+            }
+#endif
             else
             {
                 throw new JsonSerializationException("Expected date object value.");
@@ -112,13 +118,21 @@ namespace Newtonsoft.Json.Converters
             {
                 DateTime d = UnixEpoch.AddSeconds(seconds);
 
-#if HAVE_DATE_TIME_OFFSET
+#if HAVE_DATE_TIME_OFFSET || HAVE_DATE_ONLY
                 Type t = (nullable)
                     ? Nullable.GetUnderlyingType(objectType)
                     : objectType;
+#endif
+#if HAVE_DATE_TIME_OFFSET
                 if (t == typeof(DateTimeOffset))
                 {
                     return new DateTimeOffset(d, TimeSpan.Zero);
+                }
+#endif
+#if HAVE_DATE_ONLY
+                if (t == typeof(DateOnly))
+                {
+                    return DateOnly.FromDateTime(d);
                 }
 #endif
                 return d;

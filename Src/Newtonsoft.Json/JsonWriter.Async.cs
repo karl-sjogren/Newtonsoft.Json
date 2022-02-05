@@ -1740,6 +1740,12 @@ namespace Newtonsoft.Json
                         return writer.WriteValueAsync((DateTimeOffset)value, cancellationToken);
                     case PrimitiveTypeCode.DateTimeOffsetNullable:
                         return writer.WriteValueAsync(value == null ? (DateTimeOffset?)null : (DateTimeOffset)value, cancellationToken);
+#if HAVE_DATE_ONLY
+                    case PrimitiveTypeCode.DateOnly:
+                        return writer.WriteValueAsync((DateOnly)value, cancellationToken);
+                    case PrimitiveTypeCode.DateOnlyNullable:
+                        return writer.WriteValueAsync(value == null ? (DateOnly?)null : (DateOnly)value, cancellationToken);
+#endif
                     case PrimitiveTypeCode.Decimal:
                         return writer.WriteValueAsync((decimal)value, cancellationToken);
                     case PrimitiveTypeCode.DecimalNullable:

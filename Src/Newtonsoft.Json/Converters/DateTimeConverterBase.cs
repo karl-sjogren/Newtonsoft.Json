@@ -51,6 +51,12 @@ namespace Newtonsoft.Json.Converters
                 return true;
             }
 #endif
+#if HAVE_DATE_ONLY
+            if (objectType == typeof(DateOnly) || objectType == typeof(DateOnly?))
+            {
+                return true;
+            }
+#endif
 
             return false;
         }

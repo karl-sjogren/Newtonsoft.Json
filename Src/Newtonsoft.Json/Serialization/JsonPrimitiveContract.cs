@@ -67,6 +67,9 @@ namespace Newtonsoft.Json.Serialization
 #if HAVE_DATE_TIME_OFFSET
             [typeof(DateTimeOffset)] = ReadType.ReadAsDateTimeOffset,
 #endif
+#if HAVE_DATE_ONLY
+            [typeof(DateOnly)] = ReadType.ReadAsDateOnly,
+#endif
             [typeof(float)] = ReadType.ReadAsDouble,
             [typeof(double)] = ReadType.ReadAsDouble,
             [typeof(long)] = ReadType.ReadAsInt64

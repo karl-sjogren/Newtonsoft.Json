@@ -1728,7 +1728,12 @@ namespace Newtonsoft.Json
         {
             return (DateTimeOffset?)await ReadStringValueAsync(ReadType.ReadAsDateTimeOffset, cancellationToken).ConfigureAwait(false);
         }
-
+#if HAVE_DATE_ONLY
+        internal async Task<DateOnly?> DoReadAsDateOnlyAsync(CancellationToken cancellationToken)
+        {
+            return (DateOnly?)await ReadStringValueAsync(ReadType.ReadAsDateOnly, cancellationToken).ConfigureAwait(false);
+        }
+#endif
         /// <summary>
         /// Asynchronously reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="decimal"/>.
         /// </summary>

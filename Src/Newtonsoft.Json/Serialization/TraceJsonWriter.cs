@@ -202,6 +202,29 @@ namespace Newtonsoft.Json.Serialization
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        public override void WriteValue(DateOnly value)
+        {
+            _textWriter.WriteValue(value);
+            _innerWriter.WriteValue(value);
+            base.WriteValue(value);
+        }
+
+        public override void WriteValue(DateOnly? value)
+        {
+            _textWriter.WriteValue(value);
+            _innerWriter.WriteValue(value);
+            if (value.HasValue)
+            {
+                base.WriteValue(value.GetValueOrDefault());
+            }
+            else
+            {
+                base.WriteUndefined();
+            }
+        }
+#endif
+
         public override void WriteValue(double value)
         {
             _textWriter.WriteValue(value);

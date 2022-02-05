@@ -119,6 +119,15 @@ namespace Newtonsoft.Json.Serialization
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        public override DateOnly? ReadAsDateOnly()
+        {
+            DateOnly? value = _innerReader.ReadAsDateOnly();
+            WriteCurrentToken();
+            return value;
+        }
+#endif
+
         public void WriteCurrentToken()
         {
             _textWriter.WriteToken(_innerReader, false, false, true);

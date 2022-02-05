@@ -715,6 +715,42 @@ namespace Newtonsoft.Json
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Writes a <see cref="DateOnly"/> value.
+        /// </summary>
+        /// <param name="value">The <see cref="DateOnly"/> value to write.</param>
+        public override void WriteValue(DateOnly value)
+        {
+            InternalWriteValue(JsonToken.Date);
+
+            if (StringUtils.IsNullOrEmpty(DateFormatString))
+            {
+                int length = WriteValueToBuffer(value);
+
+                _writer.Write(_writeBuffer, 0, length);
+            }
+            else
+            {
+                _writer.Write(_quoteChar);
+                _writer.Write(value.ToString(DateFormatString, Culture));
+                _writer.Write(_quoteChar);
+            }
+        }
+
+        private int WriteValueToBuffer(DateOnly value)
+        {
+            EnsureWriteBuffer();
+            MiscellaneousUtils.Assert(_writeBuffer != null);
+
+            int pos = 0;
+            _writeBuffer[pos++] = _quoteChar;
+            pos = DateTimeUtils.WriteDateTimeString(_writeBuffer, pos, value.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero, DateTimeKind.Local, DateFormatHandling);
+            _writeBuffer[pos++] = _quoteChar;
+            return pos;
+        }
+#endif
+
         /// <summary>
         /// Writes a <see cref="Guid"/> value.
         /// </summary>

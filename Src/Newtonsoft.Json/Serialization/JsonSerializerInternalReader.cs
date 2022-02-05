@@ -1414,6 +1414,16 @@ namespace Newtonsoft.Json.Serialization
                                         break;
                                     }
 #endif
+#if HAVE_DATE_ONLY
+                                    case PrimitiveTypeCode.DateOnly:
+                                    case PrimitiveTypeCode.DateOnlyNullable:
+                                    {
+                                        keyValue = DateTimeUtils.TryParseDateOnly(keyValue.ToString(), reader.DateFormatString, reader.Culture, out DateOnly dateOnly)
+                                            ? dateOnly
+                                            : EnsureType(reader, keyValue, CultureInfo.InvariantCulture, contract.KeyContract, contract.DictionaryKeyType)!;
+                                        break;
+                                    }
+#endif
                                     default:
                                         keyValue = contract.KeyContract != null && contract.KeyContract.IsEnum
                                             ? EnumUtils.ParseEnum(contract.KeyContract.NonNullableUnderlyingType, (Serializer._contractResolver as DefaultContractResolver)?.NamingStrategy, keyValue.ToString(), false)

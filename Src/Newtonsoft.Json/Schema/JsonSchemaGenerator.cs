@@ -489,6 +489,9 @@ namespace Newtonsoft.Json.Schema
 #if HAVE_DATE_TIME_OFFSET
                 case PrimitiveTypeCode.DateTimeOffset:
 #endif
+#if HAVE_DATE_ONLY
+                case PrimitiveTypeCode.DateOnly:
+#endif
                     return schemaType | JsonSchemaType.String;
                 case PrimitiveTypeCode.String:
                 case PrimitiveTypeCode.Uri:

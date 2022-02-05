@@ -538,6 +538,34 @@ namespace Newtonsoft.Json.Linq
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Performs an explicit conversion from <see cref="Newtonsoft.Json.Linq.JToken"/> to <see cref="System.DateOnly"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static explicit operator DateOnly(JToken value)
+        {
+            JValue? v = EnsureValue(value);
+            if (v == null || !ValidateToken(v, DateTimeTypes, false))
+            {
+                throw new ArgumentException("Can not convert {0} to DateOnly.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
+            }
+
+            if (v.Value is DateOnly dateOnly)
+            {
+                return dateOnly;
+            }
+
+            if (v.Value is string s)
+            {
+                return DateOnly.Parse(s, CultureInfo.InvariantCulture);
+            }
+
+            return DateOnly.FromDateTime(Convert.ToDateTime(v.Value, CultureInfo.InvariantCulture));
+        }
+#endif
+
         /// <summary>
         /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
         /// </summary>
@@ -614,6 +642,13 @@ namespace Newtonsoft.Json.Linq
             }
 #endif
 
+#if HAVE_DATE_ONLY
+            if (v.Value is DateOnly dateOnly)
+            {
+                return dateOnly.ToDateTime(TimeOnly.MinValue);
+            }
+#endif
+
             return (v.Value != null) ? (DateTime?)Convert.ToDateTime(v.Value, CultureInfo.InvariantCulture) : null;
         }
 
@@ -651,6 +686,42 @@ namespace Newtonsoft.Json.Linq
             }
 
             return new DateTimeOffset(Convert.ToDateTime(v.Value, CultureInfo.InvariantCulture));
+        }
+#endif
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="DateTimeOffset"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The result of the conversion.</returns>
+        public static explicit operator DateOnly?(JToken? value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            JValue? v = EnsureValue(value);
+            if (v == null || !ValidateToken(v, DateTimeTypes, true))
+            {
+                throw new ArgumentException("Can not convert {0} to DateOnly.".FormatWith(CultureInfo.InvariantCulture, GetType(value)));
+            }
+
+            if (v.Value == null)
+            {
+                return null;
+            }
+            if (v.Value is DateOnly dateOnly)
+            {
+                return dateOnly;
+            }
+
+            if (v.Value is string s)
+            {
+                return DateOnly.Parse(s, CultureInfo.InvariantCulture);
+            }
+
+            return DateOnly.FromDateTime(Convert.ToDateTime(v.Value, CultureInfo.InvariantCulture));
         }
 #endif
 
@@ -1038,6 +1109,13 @@ namespace Newtonsoft.Json.Linq
             if (v.Value is DateTimeOffset offset)
             {
                 return offset.DateTime;
+            }
+#endif
+
+#if HAVE_DATE_ONLY
+            if (v.Value is DateOnly dateOnly)
+            {
+                return dateOnly.ToDateTime(TimeOnly.MinValue);
             }
 #endif
 
@@ -1523,6 +1601,18 @@ namespace Newtonsoft.Json.Linq
         }
 #endif
 
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="DateOnly"/> to <see cref="JToken"/>.
+        /// </summary>
+        /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
+        /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
+        public static implicit operator JToken(DateOnly value)
+        {
+            return new JValue(value);
+        }
+#endif
+
         /// <summary>
         /// Performs an implicit conversion from <see cref="Byte"/> to <see cref="JToken"/>.
         /// </summary>
@@ -1602,6 +1692,18 @@ namespace Newtonsoft.Json.Linq
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
         public static implicit operator JToken(DateTimeOffset? value)
+        {
+            return new JValue(value);
+        }
+#endif
+
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="DateOnly"/> to <see cref="JToken"/>.
+        /// </summary>
+        /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
+        /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
+        public static implicit operator JToken(DateOnly? value)
         {
             return new JValue(value);
         }
@@ -2032,6 +2134,12 @@ namespace Newtonsoft.Json.Linq
                         return (DateTimeOffset?)this;
                     case PrimitiveTypeCode.DateTimeOffset:
                         return (DateTimeOffset)this;
+#endif
+#if HAVE_DATE_ONLY
+                    case PrimitiveTypeCode.DateOnlyNullable:
+                        return (DateOnly?)this;
+                    case PrimitiveTypeCode.DateOnly:
+                        return (DateOnly)this;
 #endif
                     case PrimitiveTypeCode.String:
                         return (string?)this;

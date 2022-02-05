@@ -279,6 +279,14 @@ namespace Newtonsoft.Json.Linq.JsonPath
                         }
                         else
 #endif
+#if HAVE_DATE_ONLY
+                        if (value.Value is DateOnly dateOnly)
+                        {
+                            DateTimeUtils.WriteDateOnlyString(writer, dateOnly, null, CultureInfo.InvariantCulture);
+                        }
+                        else
+#endif
+
                         {
                             DateTimeUtils.WriteDateTimeString(writer, (DateTime)value.Value!, DateFormatHandling.IsoDateFormat, null, CultureInfo.InvariantCulture);
                         }

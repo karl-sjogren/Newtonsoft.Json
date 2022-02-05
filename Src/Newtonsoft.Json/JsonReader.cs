@@ -832,6 +832,12 @@ namespace Newtonsoft.Json
                         SetToken(JsonToken.Date, offset.DateTime, false);
                     }
 #endif
+#if HAVE_DATE_ONLY
+                    if (Value is DateOnly dateOnly)
+                    {
+                        SetToken(JsonToken.Date, dateOnly.ToDateTime(TimeOnly.MinValue), false);
+                    }
+#endif
 
                     return (DateTime)Value!;
                 case JsonToken.String:
@@ -918,6 +924,61 @@ namespace Newtonsoft.Json
 
             SetToken(JsonToken.String, s, false);
             throw JsonReaderException.Create(this, "Could not convert string to DateTimeOffset: {0}.".FormatWith(CultureInfo.InvariantCulture, s));
+        }
+#endif
+
+#if HAVE_DATE_ONLY
+        /// <summary>
+        /// Reads the next JSON token from the source as a <see cref="Nullable{T}"/> of <see cref="DateOnly"/>.
+        /// </summary>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="DateOnly"/>. This method will return <c>null</c> at the end of an array.</returns>
+        public virtual DateOnly? ReadAsDateOnly()
+        {
+            JsonToken t = GetContentToken();
+
+            switch (t)
+            {
+                case JsonToken.None:
+                case JsonToken.Null:
+                case JsonToken.EndArray:
+                    return null;
+                case JsonToken.Date:
+                    if (Value is DateTime time)
+                    {
+                        SetToken(JsonToken.Date, DateOnly.FromDateTime(time), false);
+                    }
+
+                    return (DateOnly)Value!;
+                case JsonToken.String:
+                    string? s = (string?)Value;
+                    return ReadDateOnlyString(s);
+                default:
+                    throw JsonReaderException.Create(this, "Error reading date. Unexpected token: {0}.".FormatWith(CultureInfo.InvariantCulture, t));
+            }
+        }
+
+        internal DateOnly? ReadDateOnlyString(string? s)
+        {
+            if (StringUtils.IsNullOrEmpty(s))
+            {
+                SetToken(JsonToken.Null, null, false);
+                return null;
+            }
+
+            if (DateTimeUtils.TryParseDateOnly(s, _dateFormatString, Culture, out DateOnly dateOnly))
+            {
+                SetToken(JsonToken.Date, dateOnly, false);
+                return dateOnly;
+            }
+
+            if (DateOnly.TryParse(s, Culture, DateTimeStyles.RoundtripKind, out dateOnly))
+            {
+                SetToken(JsonToken.Date, dateOnly, false);
+                return dateOnly;
+            }
+
+            SetToken(JsonToken.String, s, false);
+            throw JsonReaderException.Create(this, "Could not convert string to DateOnly: {0}.".FormatWith(CultureInfo.InvariantCulture, s));
         }
 #endif
 
@@ -1226,6 +1287,11 @@ namespace Newtonsoft.Json
 #if HAVE_DATE_TIME_OFFSET
                 case ReadType.ReadAsDateTimeOffset:
                     ReadAsDateTimeOffset();
+                    break;
+#endif
+#if HAVE_DATE_ONLY
+                case ReadType.ReadAsDateOnly:
+                    ReadAsDateOnly();
                     break;
 #endif
                 default:
